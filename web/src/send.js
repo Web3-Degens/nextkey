@@ -1205,8 +1205,12 @@ walletOut.addEventListener('click', (e) => {
  * projector, and by every screenshot taken of the page afterwards \u2014 and unlike
  * the passphrase it is read by them *instantly*, because a QR code is built to
  * be read at a glance. So it is not painted until somebody asks for it, and it
- * covers itself again a few seconds later. The eye is the same control the
- * passphrase has, so the page teaches the gesture once.
+ * covers itself again a few seconds later.
+ *
+ * What stands in its place is the eye, in the middle of the square the code
+ * will occupy, over a faint key. A line of text saying "covered" said the same
+ * thing and looked like a panel that had failed to load; a picture of a locked
+ * key with a press-here in the centre of it does not need the sentence.
  */
 const PAIR_SHOWN_MS = 5000
 
@@ -1219,22 +1223,28 @@ const pairingBlock = (sk) => {
        ${t('t.pair.warn2', 'Show it to your own phone camera and to nothing else \u2014 not to a room, not to a shared screen, not to a recording. Anyone who photographs it can read every secret sent to you.')}</p>
     <p class="note">${t('t.pair.first', 'Open the app and start the scanner first, then press the eye. The code covers itself again after five seconds, and the eye brings it back as often as you need.')}</p>
     <div class="qrbox" style="background:#fff;border-radius:12px;padding:.9rem;display:inline-block;margin:.4rem 0">
-      <div class="qrveil" style="width:220px;height:220px;box-sizing:border-box;display:flex;
-        align-items:center;justify-content:center;text-align:center;padding:1.2rem;
-        border:2px dashed #cfd4dc;border-radius:8px;color:#667085;font-size:.85rem">
-        ${t('t.pair.covered', 'Covered.')}</div>
-      <div class="qrreal" hidden>${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}</div>
-    </div>
-    <div class="eyerow">
-      <button class="eyebtn qr-reveal" type="button"
-              title="${esc(reveal)}" aria-label="${esc(reveal)}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M1.8 12S5.4 5.4 12 5.4 22.2 12 22.2 12 18.6 18.6 12 18.6 1.8 12 1.8 12z"/>
-          <circle cx="12" cy="12" r="3.1"/>
+      <button class="qrveil qr-reveal" type="button"
+              title="${esc(reveal)}" aria-label="${esc(reveal)}"
+              style="position:relative;width:220px;height:220px;padding:0;cursor:pointer;
+              display:flex;align-items:center;justify-content:center;
+              background:#fff;border:2px dashed #cfd4dc;border-radius:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#cfd4dc" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+             style="position:absolute;width:132px;height:132px">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
         </svg>
-        <span>${esc(reveal)}</span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;
+              width:58px;height:58px;border-radius:50%;background:#fff;border:1px solid #d0d5dd;
+              box-shadow:0 1px 3px rgba(16,24,40,.14);color:#475467">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+               style="width:26px;height:26px">
+            <path d="M1.8 12S5.4 5.4 12 5.4 22.2 12 22.2 12 18.6 18.6 12 18.6 1.8 12 1.8 12z"/>
+            <circle cx="12" cy="12" r="3.1"/>
+          </svg>
+        </span>
       </button>
+      <div class="qrreal" hidden>${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}</div>
     </div>
     <p class="note">${t('t.pair.how', 'In the app: \u201cPair with nextkey.li\u201d, then hold the camera here. The key is stored in the Android Keystore and never leaves the phone.')}</p>
     <p class="note">${t('t.pair.derived', 'Nothing new was created for this. It is the same key your signature derives every time, so a phone that loses it can be paired again from here.')}</p>`)

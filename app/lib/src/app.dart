@@ -46,12 +46,21 @@ class _RootState extends State<_Root> {
     _load();
   }
 
-  Future<void> _load() async {
+  /// Re-reads the stored key and rebuilds around it.
+  ///
+  /// `toId` is for the one case where the tab must move: a key has just been
+  /// paired. Whoever did that started on some other tab — Settings, usually,
+  /// because that is where the pairing entry is — and `_tab` survives the trip
+  /// through onboarding, so without this the app answers a successful scan by
+  /// returning to the screen the person was trying to leave. The result of
+  /// pairing is an identity, so the identity is what it shows.
+  Future<void> _load({bool toId = false}) async {
     final me = await store.read();
     if (!mounted) return;
     setState(() {
       _me = me;
       _loading = false;
+      if (toId && me != null) _tab = 0;
     });
   }
 
@@ -68,13 +77,18 @@ class _RootState extends State<_Root> {
     }
     final me = _me;
     if (me == null) {
-      return OnboardingPage(store: store, onDone: _load);
+      return OnboardingPage(store: store, onDone: () => _load(toId: true));
     }
 
     final pages = [
       HomePage(identity: me, store: store),
       InboxPage(identity: me, store: store, inbox: inbox),
-      SettingsPage(store: store, identity: me, onChanged: _load),
+      SettingsPage(
+        store: store,
+        identity: me,
+        onChanged: _load,
+        onPaired: () => _load(toId: true),
+      ),
     ];
 
     return Scaffold(

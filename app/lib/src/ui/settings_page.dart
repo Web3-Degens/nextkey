@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../nk/crypto.dart';
 import '../nk/identity.dart';
 import '../nk/push.dart';
 import '../theme.dart';
+import 'scan_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
@@ -11,11 +13,17 @@ class SettingsPage extends StatefulWidget {
     required this.store,
     required this.identity,
     required this.onChanged,
+    required this.onPaired,
   });
 
   final IdentityStore store;
   final Identity identity;
   final VoidCallback onChanged;
+
+  /// A key has just replaced the one that was here. Separate from `onChanged`
+  /// because the two want different screens afterwards: removing a key ends on
+  /// the onboarding page, pairing one ends on the ID it produced.
+  final VoidCallback onPaired;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -36,6 +44,72 @@ class _SettingsPageState extends State<SettingsPage> {
     widget.store.canUnlock.then((v) {
       if (mounted) setState(() => _canUnlock = v);
     });
+  }
+
+  void _say(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  /// Pair again, without deleting first.
+  ///
+  /// The only way to scan a second code used to be "remove the key from this
+  /// device", which asks somebody to destroy what they have in order to replace
+  /// it — and is a genuinely frightening thing to press when you are not yet
+  /// sure the new code works. So the scan stands on its own, the old key is
+  /// replaced only after the new one has been read and understood, and the
+  /// screen says which ID is about to take over.
+  Future<void> _pairAgain() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const ScanPage(
+          title: 'Schlüssel koppeln',
+          hint: 'Öffne nextkey.li/demo/id am Rechner, decke den '
+              'Kopplungs-Code auf und halte die Kamera darauf.',
+        ),
+      ),
+    );
+    if (result == null) return;
+
+    final payload = PairingPayload.tryParse(result);
+    if (payload == null) {
+      _say('Das ist kein NextKey-Kopplungs-Code.');
+      return;
+    }
+
+    final id = await nextkeyId(await publicKeyOf(payload.secret));
+    if (id == widget.identity.id) {
+      _say('Derselbe Schlüssel — es hat sich nichts geändert.');
+      return;
+    }
+    if (!mounted) return;
+
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Schlüssel ersetzen?'),
+        content: Text(
+          'Dieses Gerät hält dann $id statt ${widget.identity.id}. Was an die '
+          'alte ID geschickt wurde, lässt sich hier danach nicht mehr öffnen — '
+          'wohl aber wieder, sobald du sie erneut koppelst.',
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Ersetzen')),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    if (!await widget.store.unlock(reason: 'Schlüssel ersetzen')) return;
+
+    await widget.store.save(payload.secret);
+    _say('Gekoppelt. Das ist jetzt deine ID.');
+    widget.onPaired();
   }
 
   Future<void> _forget() async {
@@ -133,6 +207,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 mode: LaunchMode.externalApplication),
           ),
           const Divider(height: 32),
+          ListTile(
+            leading: const Icon(Icons.qr_code_scanner),
+            title: const Text('Anderen Schlüssel koppeln'),
+            subtitle: const Text(
+              'Kopplungs-Code auf nextkey.li/demo/id scannen. Ersetzt den '
+              'Schlüssel auf diesem Gerät — erst nach einer Rückfrage.',
+            ),
+            onTap: _pairAgain,
+          ),
           ListTile(
             leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
             title: Text('Schlüssel von diesem Gerät entfernen',

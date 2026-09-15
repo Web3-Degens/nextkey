@@ -4,6 +4,8 @@
 /// with the same arithmetic `web/src/nk-crypto.mjs` uses. This file is the only
 /// reason the port may be trusted: without it, a wrong salt or a swapped
 /// argument would produce grants that look fine and open nowhere.
+library;
+
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
