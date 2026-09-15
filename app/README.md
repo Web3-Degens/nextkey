@@ -116,9 +116,10 @@ checked on a Galaxy A53 (Android 14, Flutter 3.47):
    `https://api.nextkey.li/demo/v1/name/anna.nextkey.eth` returns, but read
    straight from the node by `ens_rpc.dart`, with no API involved.
 
-What is still open is on the site, not here: the pairing QR. The app expects
-`nextkey://identity/v2?sk=<base64url>`, and nothing on `nextkey.li` shows one
-yet, so a key reaches the phone only by being typed in.
+Pairing is closed too: `web/src/nk-qr.mjs` draws the code on the ID page, the
+app reads `nextkey://identity/v2?sk=<base64url>` from it, and it also accepts a
+claim link, whose key sits after the `#`. Typing a key in by hand still works
+and is now the fallback rather than the only way.
 
 ## Notes for whoever builds this next
 

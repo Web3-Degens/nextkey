@@ -1217,34 +1217,52 @@ const PAIR_SHOWN_MS = 5000
 const pairingBlock = (sk) => {
   const uri = 'nextkey://identity/v2?sk=' +
     b64(sk).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-  const reveal = t('t.pair.reveal', 'Show for five seconds')
+  const reveal = t('t.pair.reveal', 'Show the code')
+  const hide = t('t.pair.hide', 'Cover the code')
   return why(t('t.pair.h', 'Pair the Android app'), `
     <p><strong>${t('t.pair.warn', 'What follows is your private key, as a picture.')}</strong>
        ${t('t.pair.warn2', 'Show it to your own phone camera and to nothing else \u2014 not to a room, not to a shared screen, not to a recording. Anyone who photographs it can read every secret sent to you.')}</p>
-    <p class="note">${t('t.pair.first', 'Open the app and start the scanner first, then press the eye. The code covers itself again after five seconds, and the eye brings it back as often as you need.')}</p>
-    <div class="qrbox" style="background:#fff;border-radius:12px;padding:.9rem;display:inline-block;margin:.4rem 0">
-      <button class="qrveil qr-reveal" type="button"
-              title="${esc(reveal)}" aria-label="${esc(reveal)}"
-              style="position:relative;width:220px;height:220px;padding:0;cursor:pointer;
-              display:flex;align-items:center;justify-content:center;
-              background:#fff;border:2px dashed #cfd4dc;border-radius:8px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#cfd4dc" stroke-width="1.6"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-             style="position:absolute;width:132px;height:132px">
-          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-        </svg>
-        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;
-              width:58px;height:58px;border-radius:50%;background:#fff;border:1px solid #d0d5dd;
-              box-shadow:0 1px 3px rgba(16,24,40,.14);color:#475467">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    <p class="note">${t('t.pair.first', 'Open the app and start the scanner first, then press the eye. The code covers itself again after five seconds; the eye beside it covers it at once, and pressing the field brings it back as often as you need.')}</p>
+    <div class="qrbox" style="background:#fff;border-radius:12px;padding:.9rem;margin:.4rem 0;
+         display:inline-flex;align-items:center;gap:.7rem">
+      <div class="qrfield" style="position:relative;width:220px;height:220px">
+        <button class="qrveil qr-reveal" type="button"
+                title="${esc(reveal)}" aria-label="${esc(reveal)}"
+                style="position:absolute;inset:0;padding:0;cursor:pointer;
+                display:flex;align-items:center;justify-content:center;
+                background:#fff;border:2px dashed #cfd4dc;border-radius:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#cfd4dc" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-               style="width:26px;height:26px">
-            <path d="M1.8 12S5.4 5.4 12 5.4 22.2 12 22.2 12 18.6 18.6 12 18.6 1.8 12 1.8 12z"/>
-            <circle cx="12" cy="12" r="3.1"/>
+               style="position:absolute;width:132px;height:132px">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
           </svg>
-        </span>
+          <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;
+                width:58px;height:58px;border-radius:50%;background:#fff;border:1px solid #d0d5dd;
+                box-shadow:0 1px 3px rgba(16,24,40,.14);color:#475467">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                 style="width:26px;height:26px">
+              <path d="M1.8 12S5.4 5.4 12 5.4 22.2 12 22.2 12 18.6 18.6 12 18.6 1.8 12 1.8 12z"/>
+              <circle cx="12" cy="12" r="3.1"/>
+            </svg>
+          </span>
+        </button>
+        <div class="qrreal" style="display:none;position:absolute;inset:0"
+             >${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}</div>
+      </div>
+      <button class="qrhide qr-hide" type="button"
+              title="${esc(hide)}" aria-label="${esc(hide)}"
+              style="display:none;align-items:center;justify-content:center;cursor:pointer;
+              width:40px;height:40px;padding:0;border-radius:50%;background:#fff;
+              border:1px solid #d0d5dd;color:#475467">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+             style="width:21px;height:21px">
+          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+          <path d="M6.61 6.61A18.15 18.15 0 0 0 2 12s3 8 10 8a9.74 9.74 0 0 0 5.39-1.61"/>
+          <path d="M2 2l20 20"/>
+        </svg>
       </button>
-      <div class="qrreal" hidden>${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}</div>
     </div>
     <p class="note">${t('t.pair.how', 'In the app: \u201cPair with nextkey.li\u201d, then hold the camera here. The key is stored in the Android Keystore and never leaves the phone.')}</p>
     <p class="note">${t('t.pair.derived', 'Nothing new was created for this. It is the same key your signature derives every time, so a phone that loses it can be paired again from here.')}</p>`)
@@ -1256,21 +1274,36 @@ const pairingBlock = (sk) => {
  * `#id-out` survives every `say()`; the button inside it does not. A listener
  * on the button would be attached to an element the next result replaces, which
  * is how a control ends up present and dead.
+ *
+ * Switched with `style.display` and not with the `hidden` attribute. The veil
+ * carries an inline `display:flex`, and an inline style outranks the browser's
+ * `[hidden] { display: none }` — so setting `hidden` on it did nothing at all,
+ * and the code appeared *underneath* a cover that was still on screen. The
+ * attribute was the right idea and the wrong tool.
  */
 let pairTimer = null
-const wirePairReveal = (panel) => panel && panel.addEventListener('click', (e) => {
-  const btn = e.target.closest('.qr-reveal')
-  if (!btn) return
-  const box = btn.closest('details')?.querySelector('.qrbox')
-  const real = box?.querySelector('.qrreal')
+
+const showPair = (box, on) => {
   const veil = box?.querySelector('.qrveil')
-  if (!real || !veil) return
+  const real = box?.querySelector('.qrreal')
+  const hide = box?.querySelector('.qrhide')
+  if (!veil || !real || !hide) return
+  veil.style.display = on ? 'none' : 'flex'
+  real.style.display = on ? 'block' : 'none'
+  hide.style.display = on ? 'inline-flex' : 'none'
+}
+
+const wirePairReveal = (panel) => panel && panel.addEventListener('click', (e) => {
+  const open = e.target.closest('.qr-reveal')
+  const shut = e.target.closest('.qr-hide')
+  if (!open && !shut) return
+  const box = (open ?? shut).closest('.qrbox')
   clearTimeout(pairTimer)
-  real.hidden = false
-  veil.hidden = true
-  // Covered again on its own. Whoever pressed this is holding a phone, not
-  // watching the screen for a second button to press.
-  pairTimer = setTimeout(() => { real.hidden = true; veil.hidden = false }, PAIR_SHOWN_MS)
+  showPair(box, !!open)
+  // Covered again on its own, for whoever pressed this and then picked up a
+  // phone. The second eye is for the other case — done early, and not willing
+  // to wait out the clock with a private key on screen.
+  if (open) pairTimer = setTimeout(() => showPair(box, false), PAIR_SHOWN_MS)
 })
 wirePairReveal($('id-out'))
 
