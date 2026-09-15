@@ -103,8 +103,8 @@ what the watcher would have to be — and what it must never do.
 
 ## Verified on the device
 
-Both of the things that could not be checked where this was written — the
-sandbox had no route to Sepolia and none to `api.nextkey.li` — have now been
+Everything that could not be checked where this was written — the sandbox had
+no route to Sepolia, none to `api.nextkey.li`, and no camera — has now been
 checked on a Galaxy A53 (Android 14, Flutter 3.47):
 
 1. **The construction, on real hardware.** A known identity secret produced
@@ -116,10 +116,18 @@ checked on a Galaxy A53 (Android 14, Flutter 3.47):
    `https://api.nextkey.li/demo/v1/name/anna.nextkey.eth` returns, but read
    straight from the node by `ens_rpc.dart`, with no API involved.
 
-Pairing is closed too: `web/src/nk-qr.mjs` draws the code on the ID page, the
-app reads `nextkey://identity/v2?sk=<base64url>` from it, and it also accepts a
-claim link, whose key sits after the `#`. Typing a key in by hand still works
-and is now the fallback rather than the only way.
+3. **Pairing, end to end.** `web/src/nk-qr.mjs` draws the code on the ID page
+   and the phone's camera read it: `nextkey://identity/v2?sk=<base64url>` in,
+   the key in the Keystore, the ID on screen. A claim link works too, whose key
+   sits after the `#`. Typing a key in by hand is now the fallback rather than
+   the only way.
+
+   Two things had to be true for that, and neither was obvious. R8 strips ML
+   Kit's barcode model loader unless `proguard-rules.pro` keeps it — the debug
+   build scanned fine and the release build answered "An unexpected error
+   occurred", which is the worst kind of difference. And the code on the site is
+   a private key, so it is covered until somebody asks for it and covers itself
+   again five seconds later; the eye beside it shuts it at once.
 
 ## Notes for whoever builds this next
 
