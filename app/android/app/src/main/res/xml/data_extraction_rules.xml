@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Nothing this app holds goes into a cloud backup or a device-to-device
+  transfer. The identity key is derived from a wallet signature, so it is not
+  lost by being excluded — it is derived again on nextkey.li. A key that
+  travelled in a backup would be a copy nobody could account for.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="file" path="."/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="file" path="."/>
+    </device-transfer>
+</data-extraction-rules>

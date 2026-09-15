@@ -1,0 +1,13 @@
+# Copy to android/key.properties and fill in. That file is in .gitignore and
+# must stay there: an upload key committed once is committed for good, and Play
+# will not accept a replacement for an app that is already published without
+# going through key reset.
+#
+# Create the keystore (once, and back it up somewhere that is not this repo):
+#
+#   keytool -genkey -v -keystore C:\Users\<you>\keys\nextkey-upload.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+storePassword=
+keyPassword=
+keyAlias=upload
+storeFile=C:\\Users\\<you>\\keys\\nextkey-upload.jks

@@ -1,0 +1,23 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock.bak
+
+# Android
+android/local.properties
+android/.gradle/
+android/key.properties
+**/*.jks
+**/*.keystore
+
+# Firebase — per-project, and it identifies a Google Cloud project. Regenerate
+# it from the Firebase console rather than committing it.
+android/app/google-services.json
+
+# IDE
+.idea/
+*.iml
+.vscode/

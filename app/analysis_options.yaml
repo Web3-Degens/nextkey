@@ -1,0 +1,15 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - avoid_print
+    - unawaited_futures
+
+analyzer:
+  errors:
+    # A missed await around a key read is a bug that looks like a UI glitch.
+    unawaited_futures: error
+  exclude:
+    - build/**
+    - android/**

@@ -1,0 +1,48 @@
+name: nextkey_app
+description: NextKey — hand over a seed phrase without handing over control.
+publish_to: none
+
+# versionName+versionCode. The code is what Play orders releases by and it may
+# never repeat, so it is bumped on every upload even when the name does not
+# change.
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The construction. X25519, HKDF-SHA256 and AES-256-GCM, all three the same
+  # arithmetic the site uses; test/crypto_test.dart is what proves it.
+  cryptography: ^2.7.0
+  pointycastle: ^3.9.1          # Keccak-256, for ENS namehash
+
+  # The key, and the gate in front of it.
+  flutter_secure_storage: ^9.2.4
+  local_auth: ^2.3.0
+
+  # Reading the chain, and the read-only API as a fallback.
+  http: ^1.2.2
+
+  # QR in both directions.
+  mobile_scanner: ^6.0.2
+  qr_flutter: ^4.1.0
+  share_plus: ^10.1.4
+  url_launcher: ^6.3.1
+
+  # Optional, off until switched on. See lib/src/nk/push.dart for what it costs.
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^18.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/
