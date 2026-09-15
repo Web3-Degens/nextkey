@@ -1199,19 +1199,70 @@ walletOut.addEventListener('click', (e) => {
  *
  * Drawn here, in the page, by `nk-qr.mjs`. No image service: handing this
  * string to one would hand it the key.
+ *
+ * And it is covered, like the passphrase two panels up and for the same reason.
+ * A private key drawn at 220 pixels is read by every camera in the room, by the
+ * projector, and by every screenshot taken of the page afterwards \u2014 and unlike
+ * the passphrase it is read by them *instantly*, because a QR code is built to
+ * be read at a glance. So it is not painted until somebody asks for it, and it
+ * covers itself again a few seconds later. The eye is the same control the
+ * passphrase has, so the page teaches the gesture once.
  */
+const PAIR_SHOWN_MS = 5000
+
 const pairingBlock = (sk) => {
   const uri = 'nextkey://identity/v2?sk=' +
     b64(sk).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const reveal = t('t.pair.reveal', 'Show for five seconds')
   return why(t('t.pair.h', 'Pair the Android app'), `
     <p><strong>${t('t.pair.warn', 'What follows is your private key, as a picture.')}</strong>
        ${t('t.pair.warn2', 'Show it to your own phone camera and to nothing else \u2014 not to a room, not to a shared screen, not to a recording. Anyone who photographs it can read every secret sent to you.')}</p>
-    <div style="background:#fff;border-radius:12px;padding:.9rem;display:inline-block;margin:.4rem 0">
-      ${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}
+    <p class="note">${t('t.pair.first', 'Open the app and start the scanner first, then press the eye. The code covers itself again after five seconds, and the eye brings it back as often as you need.')}</p>
+    <div class="qrbox" style="background:#fff;border-radius:12px;padding:.9rem;display:inline-block;margin:.4rem 0">
+      <div class="qrveil" style="width:220px;height:220px;box-sizing:border-box;display:flex;
+        align-items:center;justify-content:center;text-align:center;padding:1.2rem;
+        border:2px dashed #cfd4dc;border-radius:8px;color:#667085;font-size:.85rem">
+        ${t('t.pair.covered', 'Covered.')}</div>
+      <div class="qrreal" hidden>${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}</div>
+    </div>
+    <div class="eyerow">
+      <button class="eyebtn qr-reveal" type="button"
+              title="${esc(reveal)}" aria-label="${esc(reveal)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M1.8 12S5.4 5.4 12 5.4 22.2 12 22.2 12 18.6 18.6 12 18.6 1.8 12 1.8 12z"/>
+          <circle cx="12" cy="12" r="3.1"/>
+        </svg>
+        <span>${esc(reveal)}</span>
+      </button>
     </div>
     <p class="note">${t('t.pair.how', 'In the app: \u201cPair with nextkey.li\u201d, then hold the camera here. The key is stored in the Android Keystore and never leaves the phone.')}</p>
     <p class="note">${t('t.pair.derived', 'Nothing new was created for this. It is the same key your signature derives every time, so a phone that loses it can be paired again from here.')}</p>`)
 }
+
+/**
+ * The eye, wired once on the panel rather than on the button.
+ *
+ * `#id-out` survives every `say()`; the button inside it does not. A listener
+ * on the button would be attached to an element the next result replaces, which
+ * is how a control ends up present and dead.
+ */
+let pairTimer = null
+const wirePairReveal = (panel) => panel && panel.addEventListener('click', (e) => {
+  const btn = e.target.closest('.qr-reveal')
+  if (!btn) return
+  const box = btn.closest('details')?.querySelector('.qrbox')
+  const real = box?.querySelector('.qrreal')
+  const veil = box?.querySelector('.qrveil')
+  if (!real || !veil) return
+  clearTimeout(pairTimer)
+  real.hidden = false
+  veil.hidden = true
+  // Covered again on its own. Whoever pressed this is holding a phone, not
+  // watching the screen for a second button to press.
+  pairTimer = setTimeout(() => { real.hidden = true; veil.hidden = false }, PAIR_SHOWN_MS)
+})
+wirePairReveal($('id-out'))
 
 on('be-receivable', 'click', async () => {
   const out = $('id-out')
