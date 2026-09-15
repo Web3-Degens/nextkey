@@ -340,6 +340,25 @@ if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)
   </section>
 
   <section class="step" style="padding-left:0">
+    <div data-i18n-html="l.p.app"><h2>The Android app</h2>
+    <p>The NextKey app for Android is the recipient's side of this site, and it keeps the same
+       promises: it holds no funds, signs no transactions, writes nothing to the chain, and sends
+       no secret anywhere. It has <strong>no account, no sign-in, no analytics and no crash
+       reporting</strong>, and this version has no notifications either.</p>
+    <p>It keeps exactly one thing: the X25519 key others encrypt to. That key lives in the Android
+       Keystore, is excluded from cloud backup and from device-to-device transfer, and is deleted
+       when the app is uninstalled — which is also how you ask for its deletion. Nothing is lost by
+       that: the key is derived from a wallet signature, so it can be derived again here.</p>
+    <p>Pairing puts that key on the phone by showing it as a QR code on this site, drawn in your
+       browser and fetched from nobody. For those few seconds <strong>the private half of your
+       identity key is a picture on your screen</strong>. Show it to your own camera, not to a room,
+       and not to a screen that is being recorded or shared.</p>
+    <p>The app reads the chain the same way these pages do: directly from your phone to a public
+       Ethereum node, which sees your IP address and which names you look up. It does not use
+       <span class="mono">api.nextkey.li</span>.</p></div>
+  </section>
+
+  <section class="step" style="padding-left:0">
     <div data-i18n-html="l.p.chain"><h2>The blockchain, and what cannot be undone</h2>
     <p>Anything written to the chain — a secret's ciphertext, a grant, a public key, a blog post,
        a donation — is <strong>public, permanent and copied to computers all over the world</strong>.

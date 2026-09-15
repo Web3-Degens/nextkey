@@ -42,10 +42,21 @@ class PairingPayload {
     } catch (_) {
       return null;
     }
-    final isPairing = uri.scheme == 'nextkey' &&
-        (uri.host == 'identity' || uri.pathSegments.contains('identity'));
-    final encoded = isPairing ? uri.queryParameters['sk'] : null;
-    if (encoded == null) return null;
+
+    String? encoded;
+
+    // The pairing URI the site will show as a QR code.
+    if (uri.scheme == 'nextkey' &&
+        (uri.host == 'identity' || uri.pathSegments.contains('identity'))) {
+      encoded = uri.queryParameters['sk'];
+    }
+
+    // A claim link from the send flow, which the site already produces today:
+    // the key sits after the `#`, where browsers never send it to a server.
+    // `k=` is its name there; `sk=` is accepted for symmetry with the URI above.
+    encoded ??= _fromPairs(uri.fragment) ?? _fromPairs(uri.query);
+
+    if (encoded == null || encoded.isEmpty) return null;
     try {
       final bytes = un64(encoded.replaceAll('-', '+').replaceAll('_', '/'));
       if (bytes.length != 32) return null;
@@ -53,6 +64,25 @@ class PairingPayload {
     } catch (_) {
       return null;
     }
+  }
+
+  /// `k` or `sk` out of an `a=1&b=2` string, percent-decoding included — the
+  /// site writes the key with `encodeURIComponent`, so its `+` and `=` arrive
+  /// as `%2B` and `%3D` and would otherwise decode to the wrong bytes.
+  static String? _fromPairs(String source) {
+    if (source.isEmpty) return null;
+    for (final pair in source.split('&')) {
+      final i = pair.indexOf('=');
+      if (i <= 0) continue;
+      final name = pair.substring(0, i);
+      if (name != 'k' && name != 'sk') continue;
+      try {
+        return Uri.decodeComponent(pair.substring(i + 1));
+      } catch (_) {
+        return pair.substring(i + 1);
+      }
+    }
+    return null;
   }
 }
 

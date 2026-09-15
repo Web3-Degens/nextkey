@@ -3,11 +3,18 @@
 # will not accept a replacement for an app that is already published without
 # going through key reset.
 #
-# Create the keystore (once, and back it up somewhere that is not this repo):
+# Create the keystore once, and back it up somewhere that is not this repo —
+# losing it means losing the ability to update the published app:
 #
-#   keytool -genkey -v -keystore C:\Users\<you>\keys\nextkey-upload.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#   mkdir %USERPROFILE%\keys
+#   keytool -genkeypair -v -keystore %USERPROFILE%\keys\nextkey-upload.p12 -storetype PKCS12 -keyalg RSA -keysize 2048 -validity 10000 -alias upload
 #
+# PKCS12 rather than the older JKS: same result, no deprecation warning, and one
+# password instead of two — with PKCS12 the two lines below hold the same value.
+#
+# Backslashes are doubled. With single ones Gradle does not find the file and
+# signs with the debug key instead, which Play refuses at upload.
 storePassword=
 keyPassword=
 keyAlias=upload
-storeFile=C:\\Users\\<you>\\keys\\nextkey-upload.jks
+storeFile=C:\\Users\\<you>\\keys\\nextkey-upload.p12

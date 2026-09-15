@@ -8,3 +8,13 @@
 
 # Tink, under flutter_secure_storage's EncryptedSharedPreferences.
 -keep class com.google.crypto.tink.** { *; }
+
+# ML Kit, under mobile_scanner. R8 strips the barcode model loader, and the
+# scanner then fails at run time with "An unexpected error occurred" — which is
+# what the first release build did, while the debug build was fine because
+# nothing was stripped there.
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.internal.mlkit_** { *; }
+-keep class com.google.android.odml.** { *; }
+-dontwarn com.google.mlkit.**
+-dontwarn com.google.android.odml.**

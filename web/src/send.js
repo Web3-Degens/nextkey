@@ -50,6 +50,7 @@ import {
   locateAckV2, ackKeyForSender,
   nextkeyId,
 } from './nk-crypto.mjs'
+import { qrSvg } from './nk-qr.mjs'
 
 // ─── The deployment ────────────────────────────────────────────────────────
 // The hackathon ENSv2 deployment, not production. viem ships its own Sepolia
@@ -1187,6 +1188,31 @@ walletOut.addEventListener('click', (e) => {
  * them the identical key — which is the point. Moving to their own name later
  * changes the address, not the identity.
  */
+/**
+ * The pairing code for the Android app.
+ *
+ * This is the one place on the site that shows a *private* key, so it is folded
+ * away behind a summary the visitor has to open, and the first thing inside it
+ * says what is about to be on screen. The app reads the same bytes the wallet
+ * signature derived, which is what makes the two halves of NextKey one identity
+ * rather than two.
+ *
+ * Drawn here, in the page, by `nk-qr.mjs`. No image service: handing this
+ * string to one would hand it the key.
+ */
+const pairingBlock = (sk) => {
+  const uri = 'nextkey://identity/v2?sk=' +
+    b64(sk).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  return why(t('t.pair.h', 'Pair the Android app'), `
+    <p><strong>${t('t.pair.warn', 'What follows is your private key, as a picture.')}</strong>
+       ${t('t.pair.warn2', 'Show it to your own phone camera and to nothing else \u2014 not to a room, not to a shared screen, not to a recording. Anyone who photographs it can read every secret sent to you.')}</p>
+    <div style="background:#fff;border-radius:12px;padding:.9rem;display:inline-block;margin:.4rem 0">
+      ${qrSvg(uri, { size: 220, label: 'NextKey pairing code' })}
+    </div>
+    <p class="note">${t('t.pair.how', 'In the app: \u201cPair with nextkey.li\u201d, then hold the camera here. The key is stored in the Android Keystore and never leaves the phone.')}</p>
+    <p class="note">${t('t.pair.derived', 'Nothing new was created for this. It is the same key your signature derives every time, so a phone that loses it can be paired again from here.')}</p>`)
+}
+
 on('be-receivable', 'click', async () => {
   const out = $('id-out')
   const eth = announced[0]?.provider ?? window.ethereum
@@ -1225,7 +1251,7 @@ on('be-receivable', 'click', async () => {
           <dt>${t('t.name', 'name')}</dt><dd class="mono">${esc(already)}</dd>
           <dt>${t('t.pubkey', 'published key')}</dt><dd class="mono break">${esc(value0)}</dd>
         </dl>
-`,
+        ${pairingBlock(sk)}`,
         { step: 2, recipient: 'derived', name: already, nextkeyId: nextkeyId(pk), publicKey: value0, wrote: false })
     }
 
@@ -1262,6 +1288,7 @@ on('be-receivable', 'click', async () => {
         <dt>${t('t.id.from', 'derived from')}</dt><dd class="mono break">${esc(addr)}</dd>
       </dl>
       <p class="note"><a href="https://sepolia.etherscan.io/tx/${esc(hash)}" target="_blank" rel="noopener noreferrer">${t('t.tx', 'transaction')}</a></p>
+      ${pairingBlock(sk)}
       ${why(t('t.why', 'Why this matters'), `
         <p>${t('t.id.note1', 'Nothing was generated and nothing was stored. That key came out of your signature and comes back out of it every time, on any machine you can sign from — lose this browser, this page and this name, and the key is still yours.')}</p>
         <p>${t('t.id.note2', 'The name is lent, not owned: it is one of this project\'s names, and the record was written and paid for by this page. Publish the same key on a name you own and the address changes while the identity does not, because the key was never tied to the name.')}</p>`)}`,
